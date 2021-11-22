@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import com.example.smack.R
 import com.example.smack.Services.AuthService
 
@@ -52,7 +53,23 @@ class CreateUserActivity : AppCompatActivity() {
     }
 
     fun createUserClicked(view: View){
-        AuthService.registerUser(this, "email@example.com", "123456") {
+        val userName = findViewById<TextView>(findViewById(R.id.createUsernameTxt))
+        val email = findViewById<TextView>(findViewById(R.id.createEmailTxt))
+        val password = findViewById<TextView>(findViewById(R.id.createPasswordTxt))
+
+        AuthService.registerUser(this, email.text.toString(), password.text.toString()) { registerSuccess ->
+            if(registerSuccess){
+                AuthService.loginUser(this, email.text.toString(), password.text.toString()) { loginSuccess ->
+                    if(loginSuccess) {
+                        AuthService.createUser(this, userName.text.toString(), email.text.toString(), userAvatar, avatarColor){createSuccess ->
+                            if(createSuccess){
+                                finish()
+                            }
+                        }
+
+                    }
+                }
+            }
 
         }
     }

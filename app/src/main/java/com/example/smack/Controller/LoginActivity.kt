@@ -6,10 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.example.smack.R
 import com.example.smack.Services.AuthService
 
@@ -22,13 +19,14 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_login)
+
         loginSpinner = findViewById(R.id.loginSpinner)
         loginCreateUserBtn = findViewById(R.id.loginCreateUserBtn)
         loginLoginBtn = findViewById(R.id.loginLoginBtn)
         loginEmailTxt = findViewById(R.id.loginEmailTxt)
         loginPasswordTxt = findViewById(R.id.loginPasswordTxt)
 
-        setContentView(R.layout.activity_login)
         loginSpinner.visibility = View.INVISIBLE
     }
 

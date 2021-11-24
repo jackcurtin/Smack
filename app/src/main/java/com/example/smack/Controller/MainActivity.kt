@@ -26,9 +26,13 @@ import com.example.smack.R
 import com.example.smack.Services.AuthService
 import com.example.smack.Services.UserDataService
 import com.example.smack.Utilities.BROADCAST_USER_DATA_CHANGE
+import com.example.smack.Utilities.SOCKET_URL
 import com.example.smack.databinding.ActivityMainBinding
+import io.socket.client.IO
 
 class MainActivity : AppCompatActivity() {
+
+    val socket = IO.socket(SOCKET_URL)
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -64,8 +68,19 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+    }
+
+    override fun onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
             IntentFilter(BROADCAST_USER_DATA_CHANGE))
+        socket.connect()
+        super.onResume()
+    }
+
+    override fun onDestroy() {
+        socket.disconnect()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
+        super.onDestroy()
     }
 
     private val userDataChangeReceiver = object: BroadcastReceiver() {
@@ -112,13 +127,10 @@ class MainActivity : AppCompatActivity() {
                     val channelName = nameTextField.text.toString()
                     val channelDesc = descTextField.text.toString()
 
-
-                    hideKeyboard()
+                    socket.emit("newChannel", channelName, channelDesc)
 
                 }
                 .setNegativeButton("Cancel") { dialogInterface, i ->
-
-                    hideKeyboard()
 
                 }
                 .show()
@@ -127,7 +139,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun sendMessageButtonClicked (view: View){
-
+        hideKeyboard()
     }
 
     fun hideKeyboard() {

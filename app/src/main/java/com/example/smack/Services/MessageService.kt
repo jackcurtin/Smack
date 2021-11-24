@@ -15,17 +15,16 @@ object MessageService {
 
     fun getChannels(context: Context, complete: (Boolean) -> Unit) {
         val channelsRequest = object : JsonObjectRequest(Method.GET, URL_GET_CHANNELS, null, Response.Listener { response ->
-
             try {
-
                 for (x in 0 until response.length()) {
-                    val channel = response.getJSONObject(x.toString())
-                    val name = channel.getString("name")
-                    val chanDesc = channel.getString("description")
-                    val channelId = channel.getString("_id")
-
-                    val newChannel = Channel(name, chanDesc, channelId)
-                    this.channels.add(newChannel)
+                    println(response)
+//                    val channel = response.getJSONObject()
+//                    val name = channel.getString("name")
+//                    val chanDesc = channel.getString("description")
+//                    val channelId = channel.getString("_id")
+//
+//                    val newChannel = Channel(name, chanDesc, channelId)
+//                    this.channels.add(newChannel)
                 }
                 complete(true)
 
@@ -34,7 +33,7 @@ object MessageService {
             }
 
         }, Response.ErrorListener { error ->
-            Log.d("ERROR", "Could not retrieve channels")
+            Log.d("ERROR", "Could not retrieve channels: $error")
             complete(false)
 
         }) {

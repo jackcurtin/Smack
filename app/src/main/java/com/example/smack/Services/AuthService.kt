@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.JsonRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.example.smack.Utilities.*
@@ -51,9 +50,8 @@ object AuthService {
         val requestBody = jsonBody.toString()
 
         val loginRequest = object: JsonObjectRequest(Method.POST, URL_LOGIN, null, Response.Listener { response ->
-
             try {
-                userEmail = response.getString("email")
+                userEmail = response.getString("user")
                 authToken = response.getString("token")
                 isLoggedIn = true
                 complete(true)
@@ -62,7 +60,7 @@ object AuthService {
                 complete(false)
             }
         }, Response.ErrorListener { error ->
-            Log.d("ERROR", "Could not login user: $error")
+            Log.d("ERROR", "Could not login user: $error token: $authToken")
             complete(false)
         }) {
             override fun getBodyContentType(): String {
@@ -91,7 +89,7 @@ object AuthService {
                 UserDataService.name = response.getString("name")
                 UserDataService.email = response.getString("email")
                 UserDataService.avatarName = response.getString("avatarName")
-                UserDataService.avatarColor = response.getString("avatar")
+                UserDataService.avatarColor = response.getString("avatarColor")
                 UserDataService.id = response.getString("_id")
                 complete(true)
             } catch (e: JSONException){
@@ -139,7 +137,7 @@ object AuthService {
                 Log.d("JSON", "EXC: " + e.localizedMessage)
             }
         }, Response.ErrorListener { error ->
-            Log.d("ERROR", "Could not find user.")
+            Log.d("ERROR", "Could not find user: $error")
             complete(false)
         }) {
             override fun getBodyContentType(): String {

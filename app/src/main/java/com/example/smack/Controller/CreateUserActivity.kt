@@ -67,9 +67,9 @@ class CreateUserActivity : AppCompatActivity() {
 
     fun createUserClicked(view: View){
         enableSpinner(true)
-        val userName = findViewById<TextView>(findViewById(R.id.createUsernameTxt)).text.toString()
-        val email = findViewById<TextView>(findViewById(R.id.createEmailTxt)).text.toString()
-        val password = findViewById<TextView>(findViewById(R.id.createPasswordTxt)).text.toString()
+        val userName = findViewById<TextView>(R.id.createUsernameTxt).text.toString()
+        val email = findViewById<TextView>(R.id.createEmailTxt).text.toString()
+        val password = findViewById<TextView>(R.id.createPasswordTxt).text.toString()
 
         if (userName.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
             AuthService.registerUser(this, email, password) { registerSuccess ->

@@ -22,13 +22,16 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.example.smack.Model.Channel
 import com.example.smack.R
 import com.example.smack.Services.AuthService
+import com.example.smack.Services.MessageService
 import com.example.smack.Services.UserDataService
 import com.example.smack.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.example.smack.Utilities.SOCKET_URL
 import com.example.smack.databinding.ActivityMainBinding
 import io.socket.client.IO
+import io.socket.emitter.Emitter
 
 class MainActivity : AppCompatActivity() {
 
@@ -50,6 +53,9 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.appBarMain.toolbar)
 
+        socket.connect()
+        socket.on("channelCreated", onNewChannel)
+
         userNameNavHeader = findViewById(R.id.userNameNavHeader)
         userEmailNavHeader = findViewById(R.id.userEmailNavHeader)
         userImageNavHeader = findViewById(R.id.userImageNavHeader)
@@ -67,13 +73,11 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-
     }
 
     override fun onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
             IntentFilter(BROADCAST_USER_DATA_CHANGE))
-        socket.connect()
         super.onResume()
     }
 
@@ -126,16 +130,24 @@ class MainActivity : AppCompatActivity() {
                     val descTextField = dialogView.findViewById<EditText>(R.id.addChannelDescTxt)
                     val channelName = nameTextField.text.toString()
                     val channelDesc = descTextField.text.toString()
-
                     socket.emit("newChannel", channelName, channelDesc)
-
                 }
                 .setNegativeButton("Cancel") { dialogInterface, i ->
-
                 }
                 .show()
         }
+    }
 
+    private val onNewChannel = Emitter.Listener { args ->
+        runOnUiThread {
+            val channelName = args[0] as String
+            val channelDescription = args[1] as String
+            val channelId = args[2] as String
+
+            val newChannel = Channel(channelName, channelDescription, channelId)
+
+            MessageService.channels.add(newChannel)
+        }
     }
 
     fun sendMessageButtonClicked (view: View){

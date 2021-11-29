@@ -159,8 +159,8 @@ class MainActivity : AppCompatActivity() {
             val channelId = args[2] as String
 
             val newChannel = Channel(channelName, channelDescription, channelId)
-
             MessageService.channels.add(newChannel)
+            channelAdapter.notifyDataSetChanged()
         }
     }
 

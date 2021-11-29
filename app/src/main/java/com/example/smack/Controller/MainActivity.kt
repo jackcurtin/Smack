@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -18,6 +19,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.smack.Model.Channel
 import com.example.smack.R
@@ -35,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     val socket = IO.socket(SOCKET_URL)
     lateinit var channelAdapter: ArrayAdapter<Channel>
     lateinit var channelList: ListView
+    lateinit var mainChannelName: TextView
+    var selectedChannel: Channel? = null
 
 
     private fun setupAdapters(){
@@ -66,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         userImageNavHeader = findViewById(R.id.userImageNavHeader)
         loginBtnNavHeader = findViewById(R.id.loginBtnNavHeader)
         channelList = findViewById(R.id.channel_list)
+        mainChannelName = findViewById(R.id.mainChannelName)
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
@@ -78,6 +83,12 @@ class MainActivity : AppCompatActivity() {
             ), drawerLayout
         )
         setupAdapters()
+
+        channelList.setOnItemClickListener { _, _, i, _ ->
+            selectedChannel = MessageService.channels[i]
+            drawerLayout.closeDrawer(GravityCompat.START)
+            updateWithChannel()
+        }
 
         if(App.prefs.isLoggedIn){
             AuthService.findUserByEmail(this){}
@@ -108,14 +119,24 @@ class MainActivity : AppCompatActivity() {
                 userImageNavHeader.setBackgroundColor(UserDataService.returnAvatarColor(UserDataService.avatarColor))
                 loginBtnNavHeader.text = "Logout"
 
-                MessageService.getChannels(context) { complete ->
+                MessageService.getChannels { complete ->
                     if(complete) {
-                        channelAdapter.notifyDataSetChanged()
+                        if(MessageService.channels.count() > 0){
+                            selectedChannel = MessageService.channels[0]
+                            channelAdapter.notifyDataSetChanged()
+                            updateWithChannel()
+                        }
+
                     }
 
                 }
             }
         }
+    }
+
+    fun updateWithChannel(){
+        mainChannelName.text = "#${selectedChannel?.name}"
+        //download messages for channel
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -143,14 +164,14 @@ class MainActivity : AppCompatActivity() {
             val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog, null)
 
             builder.setView(dialogView)
-                .setPositiveButton("Add"){ dialogInterface, i ->
+                .setPositiveButton("Add"){ _, i ->
                     val nameTextField = dialogView.findViewById<EditText>(R.id.addChannelNameTxt)
                     val descTextField = dialogView.findViewById<EditText>(R.id.addChannelDescTxt)
                     val channelName = nameTextField.text.toString()
                     val channelDesc = descTextField.text.toString()
                     socket.emit("newChannel", channelName, channelDesc)
                 }
-                .setNegativeButton("Cancel") { dialogInterface, i ->
+                .setNegativeButton("Cancel") { _, i ->
                 }
                 .show()
         }
